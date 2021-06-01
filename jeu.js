@@ -1,3 +1,21 @@
+let vaisseau = new Sprite("./images/ready/vaisseau.png", 500, 800);
+
+// m pour monstre
+let m1 = new Sprite("./images/ready/m1.png", 100, 100);
+let m2 = new Sprite("./images/ready/m2.png", 200, 100);
+let m3 = new Sprite("./images/ready/m3.png", 300, 100);
+let m4 = new Sprite("./images/ready/m4.png", 400, 100);
+let m5 = new Sprite("./images/ready/m5.png", 500, 100);
+
+// missile
+let missile = new Sprite("./images/ready/missile.png", 0, 0);
+missile.display = "none";
+
+
+
+
+
+
 // Création d'objet Sprite = élément graphique
     // je vais donner 3 paramètres à la fonction :
     // 1) le chemin d'accès au fichier
@@ -13,7 +31,7 @@ function Sprite(filename, left, top) {
     // je fabrique l'élément dans l'HTML
     document.body.appendChild(this._node);
 
-    // on cherche à contrôler le position de l'élément en cours .this
+    // on cherche à contrôler le positionnement de l'élément en cours this
     Object.defineProperty(this, "left", {
         // je recupère la valeur du positionnement left (ça c'est de la lecture)
         get: function() {
@@ -28,4 +46,160 @@ function Sprite(filename, left, top) {
             this._node.style.left = this._left + "px";
         }
     });
+
+     // on cherche à contrôler le positionnement de l'élément en cours this
+     Object.defineProperty(this, "top", {
+        // je recupère la valeur du positionnement top (ça c'est de la lecture)
+        get: function() {
+            // je retourne la valeur left
+            return this._top;
+        },
+        // j'attribue une valeur à top (ça c'est du déplacement)
+        set: function(value) {
+            // j'applique à left la valeur reçue en paramètre
+            this._top = value;
+            // j'applique au style de l'img (_node = image) le positionnement en pixel
+            this._node.style.top = this._top + "px";
+        }
+    });
+
+         // on cherche à contrôler l'affichage de l'élément
+         Object.defineProperty(this, "display", {
+            // je recupère la valeur de l'affichage (ça c'est de la lecture)
+            get: function() {
+                // je retourne la valeur left
+                return this._node.style.display;
+            },
+            // j'attribue une valeur à l'affichage (ça c'est du paramètrage)
+            set: function(value) {
+                // j'applique au style de l'img (_node = image) le positionnement en pixel
+                this._node.style.display = value;
+            }
+        });
+
+        this.left = left;
+        this.top = top;
+}
+// ------------------------------------- gestion des touches -------------------------------------
+
+// j'écoute le clavier pour recupérer un keycode (clé de la touche appuyée)
+document.onkeydown = function (event){
+    // permet de voir quelle touche est appuyée
+    console.log(event.keyCode);
+    // touche fleche du haut
+    if(event.keyCode == 38){
+        vaisseau.top -= 10;
+    }
+    // left
+    if(event.keyCode == 37){
+        vaisseau.left -= 10;
+    }
+    //right
+    if(event.keyCode == 39){
+        vaisseau.left +=  10;
+    }
+    //down
+    if(event.keyCode == 40){
+        vaisseau.top +=  10;
+    }
+    // espace = tir
+    if(event.keyCode == 32){
+        // on ne peut tirer qu'un missile à la fois
+        if(missile.display == "none"){
+            // affichage du missile
+            missile.display="block";
+            // je centre le missile au milieu du vaisseau
+            missile.left = vaisseau.left + (vaisseau._node.width - missile._node.width) /2
+            // je mets le missile au dessus du vaisseau
+            missile.top = vaisseau.top;
+            // j'invoque la fonction d'envoie du missile 
+            // param 1 = le nom de la fonction 
+            // param 2 = la fréquence de rafraichissement
+            missile.startAnimation(moveMissile, 20);
+        }
+        
+    }
+
+    // -------------------------------- vérifications qu'on ne sort pas du cadre  ------------
+    if(vaisseau.left < 0){
+        // si je sors du cadre alors je suis redéplacer à la valeur 0 (bord de map)
+        vaisseau.left =0;
+    }
+    // je vérifie que je ne sors pas à droite, donc je prends en compte la largeur du client - la largeur de l'image
+    if(vaisseau.left > document.body.clientWidth - vaisseau._node.width){
+         vaisseau.left = document.body.clientWidth - vaisseau._node.width;
+    }
+    if(vaisseau.top < 0){
+        // si je sors du cadre alors je suis redéplacer à la valeur 0 (bord de map)
+        vaisseau.top =0;
+    }
+    if(vaisseau.top > document.body.clientHeight - vaisseau._node.height){
+        vaisseau.top = document.body.clientHeight - vaisseau._node.height;
+    }
+    if(window.onresize){
+        if(vaisseau.left < 0){
+            // si je sors du cadre alors je suis redéplacer à la valeur 0 (bord de map)
+            vaisseau.left = 0;
+        }
+        // je vérifie que je ne sors pas à droite, donc je prends en compte la largeur du client - la largeur de l'image
+        if(vaisseau.left > document.body.clientWidth - vaisseau._node.width){
+             vaisseau.left = document.body.clientWidth - vaisseau._node.width;
+        }
+        if(vaisseau.top < 0){
+            // si je sors du cadre alors je suis redéplacer à la valeur 0 (bord de map)
+            vaisseau.top = 0;
+        }
+        if(vaisseau.top > document.body.clientHeight - vaisseau._node.height){
+            vaisseau.top = document.body.clientHeight - vaisseau._node.height;
+        }
+    }
+    // ----------------------      création de l'interval de déplacement du missile et des monstres    ---------------------------------
+    
+    // on ajoute une animation de départ
+    // paramètre 1 = le nom de la fonction à rafraichir/rééxécuter (ex: startAnimation(missile, 20))
+    // paramètre 2 = l'interval (le délais de rééxécution de l'action)
+    Sprite.prototype.startAnimation = function (fct, interval) {
+        // s'il existe déjà un interval (ex: un missile tiré), alors je l'annule
+        if(this._clock) {
+            window.clearInterval(this._clock);
+        }
+        // on associe à _this la valeur actuelle de l'objet
+        let _this = this;
+        // je déclenche à interval régulier et je stock cette action dans une variable _clock
+        this._clock = window.setInterval(function() {
+            // le _this correspond à l'élément et non pas à la fonction grâce à la ligne 140
+            fct (_this);
+        }, interval);
+    };
+    // on arrête l'animation de départ stockée dans la variable _clock
+    Sprite.prototype.stopAnimation = function () {
+        window.clearInterval(this._clock);
+    }
+
+    // ---------------------- Création du déplacement du missile et des monstres ---------------------------------
+
+    function moveMissile(missile){
+        // je fais monter le missile (la valeur correspond à la vitesse du missile)
+        missile.top -= 10;
+        // arrête le missile lorsqu'il sort de sa fenêtre
+        if(missile.top < -100) {
+            missile.stopAnimation();
+            missile.display = "none";
+        }
+    }
+
+    function moveMonsterToRight(monster){
+        // la valeur est la vitesse de déplacement vers la droite
+        monster.left += 2;
+        // si le monstre arrive au bord de map
+        // je déduis la largeur de l'image du monstre pour ne pas soritr du cadre
+        if(monster.left > document.body.clientWidth - monster._node.width){
+            // je vais descendre mon monstre quand il arrive en bout de ligne
+            monster.top += 50;
+            // je déclenche l'animation du monstre avec la fonction toRight, rafraichie à 20ms
+            monster.startAnimation(moveMonsterToRight, 20);
+        }
+    }
+
+    m1.startAnimation(moveMonsterToRight, 20);
 }
