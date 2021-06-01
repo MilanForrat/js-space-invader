@@ -10,6 +10,7 @@ body{
     color: white;
     width: 100vw;
     height: 100vh;
+    text-align: center;
 }
 video{
     position: fixed;
@@ -22,4 +23,30 @@ video{
 a{
     text-decoration: none;
     color: white;
+}
+.start{
+    background-image: url(./images/fond-planet.jpg);
+    text-align: center;
+}
+#startTitle{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%);
+    transition: all 1s;
+    text-shadow: 1px 5px 8px black;
+    background-color: rgba(0, 0, 0, 0.521);
+    padding: 10px;
+    border-radius: 3px;
+    color: rgb(189, 189, 189);
+}
+#white-space{
+    margin-left: 10px;
+}
+footer{
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    margin-bottom: 5px;
+    transform: translateX(-50%);
 }

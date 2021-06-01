@@ -1,4 +1,6 @@
-let vaisseau = new Sprite("./images/ready/vaisseau.png", 500, 800);
+let startTitle = document.getElementById('startTitle');
+// console.log(startTitle);
+let vaisseau = new Sprite("./images/ready/vaisseau.png", 500, 700);
 
 // m pour monstre
 let m1 = new Sprite("./images/ready/m1.png", 100, 100);
@@ -10,10 +12,6 @@ let m5 = new Sprite("./images/ready/m5.png", 500, 100);
 // missile
 let missile = new Sprite("./images/ready/missile.png", 0, 0);
 missile.display = "none";
-
-
-
-
 
 
 // Création d'objet Sprite = élément graphique
@@ -81,43 +79,58 @@ function Sprite(filename, left, top) {
         this.top = top;
 }
 // ------------------------------------- gestion des touches -------------------------------------
-
+    // tant que je n'ai pas appuyé sur entrer
+    let refreshStart = setInterval(playStartAnimation, 500);
+    // je lance une fonction qui change la couleur du texte html
+    function playStartAnimation() {
+      startTitle.style.color = startTitle.style.color == "white" ? "red" : "white";
+    }
+     
 // j'écoute le clavier pour recupérer un keycode (clé de la touche appuyée)
-document.onkeydown = function (event){
-    // permet de voir quelle touche est appuyée
-    console.log(event.keyCode);
-    // touche fleche du haut
-    if(event.keyCode == 38){
-        vaisseau.top -= 10;
-    }
-    // left
-    if(event.keyCode == 37){
-        vaisseau.left -= 10;
-    }
-    //right
-    if(event.keyCode == 39){
-        vaisseau.left +=  10;
-    }
-    //down
-    if(event.keyCode == 40){
-        vaisseau.top +=  10;
-    }
-    // espace = tir
-    if(event.keyCode == 32){
-        // on ne peut tirer qu'un missile à la fois
-        if(missile.display == "none"){
-            // affichage du missile
-            missile.display="block";
-            // je centre le missile au milieu du vaisseau
-            missile.left = vaisseau.left + (vaisseau._node.width - missile._node.width) /2
-            // je mets le missile au dessus du vaisseau
-            missile.top = vaisseau.top;
-            // j'invoque la fonction d'envoie du missile 
-            // param 1 = le nom de la fonction 
-            // param 2 = la fréquence de rafraichissement
-            missile.startAnimation(moveMissile, 20);
+document.onkeydown = function play(enter){
+
+    // si j'appuie sur "entrer"
+    if(enter.keyCode == 13){
+    document.body.className ="";
+    startTitle.style.display ="none";
+    document.onkeydown = function (event){
+
+        // permet de voir quelle touche est appuyée
+        // console.log(event.keyCode);
+        // touche fleche du haut
+        if(event.keyCode == 38){
+            vaisseau.top -= 10;
         }
-        
+        // left
+        if(event.keyCode == 37){
+            vaisseau.left -= 10;
+        }
+        //right
+        if(event.keyCode == 39){
+            vaisseau.left +=  10;
+        }
+        //down
+        if(event.keyCode == 40){
+            vaisseau.top +=  10;
+        }
+        // espace = tir
+        if(event.keyCode == 32){
+            // on ne peut tirer qu'un missile à la fois
+            if(missile.display == "none"){
+                // affichage du missile
+                missile.display="block";
+                // je centre le missile au milieu du vaisseau
+                missile.left = vaisseau.left + (vaisseau._node.width - missile._node.width) /2
+                // je mets le missile au dessus du vaisseau
+                missile.top = vaisseau.top;
+                // j'invoque la fonction d'envoie du missile 
+                // param 1 = le nom de la fonction 
+                // param 2 = la fréquence de rafraichissement
+                missile.startAnimation(moveMissile, 20);
+            }
+            
+        }  
+
     }
 
     // -------------------------------- vérifications qu'on ne sort pas du cadre  ------------
@@ -190,16 +203,40 @@ document.onkeydown = function (event){
 
     function moveMonsterToRight(monster){
         // la valeur est la vitesse de déplacement vers la droite
-        monster.left += 2;
+        monster.left += 20;
         // si le monstre arrive au bord de map
         // je déduis la largeur de l'image du monstre pour ne pas soritr du cadre
         if(monster.left > document.body.clientWidth - monster._node.width){
             // je vais descendre mon monstre quand il arrive en bout de ligne
-            monster.top += 50;
+            monster.top += 30;
+            // j'empêche mon monstre de sortir du cadre
+            monster.left = document.body.clientWidth - monster._node.width;
             // je déclenche l'animation du monstre avec la fonction toRight, rafraichie à 20ms
-            monster.startAnimation(moveMonsterToRight, 20);
+            monster.startAnimation(moveMonsterToLeft, 20);
+        }
+        // si le monstre dépasse j'arrête son animation 
+        if(monster.top > document.body.clientHeight + monster._node.height) {
+            monster.stopAnimation();
         }
     }
 
+    function moveMonsterToLeft(monster){
+        // la valeur est la vitesse de déplacement vers la droite
+        monster.left -= 20;
+        // si le monstre arrive au bord de map
+        // je déduis la largeur de l'image du monstre pour ne pas soritr du cadre
+        if(monster.left <= 0){
+            // je vais descendre mon monstre quand il arrive en bout de ligne
+            monster.top += 30;
+            // je déclenche l'animation du monstre avec la fonction toRight, rafraichie à 20ms
+            monster.startAnimation(moveMonsterToRight, 20);
+        }
+        // si le monstre dépasse j'arrête son animation
+        if(monster.top > document.body.clientHeight + monster._node.height) {
+            monster.stopAnimation();
+        }
+    }
+    
     m1.startAnimation(moveMonsterToRight, 20);
+    }
 }
