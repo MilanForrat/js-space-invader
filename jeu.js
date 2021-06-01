@@ -1,18 +1,24 @@
 let startTitle = document.getElementById('startTitle');
 // console.log(startTitle);
-let vaisseau = new Sprite("./images/ready/vaisseau.png", 500, 700);
+let vaisseau = new Sprite("./images/ready/vaisseau.png", document.body.clientWidth/2, 700);
+
+// je recupère les enfants du body
+let imgElement = document.body.childNodes;
+console.log(imgElement)
 
 // m pour monstre
-let m1 = new Sprite("./images/ready/m1.png", 100, 100);
-let m2 = new Sprite("./images/ready/m2.png", 200, 100);
-let m3 = new Sprite("./images/ready/m3.png", 300, 100);
-let m4 = new Sprite("./images/ready/m4.png", 400, 100);
-let m5 = new Sprite("./images/ready/m5.png", 500, 100);
+let m1 = new Sprite("./images/ready/m1.png",Math.floor(Math.random() * 300)
+, Math.floor(Math.random() *150));
+let m2 = new Sprite("./images/ready/m2.png", Math.floor(Math.random() *1000), Math.floor(Math.random() *150));
+let m3 = new Sprite("./images/ready/m3.png", Math.floor(Math.random() *1000), Math.floor(Math.random() *150));
+let m4 = new Sprite("./images/ready/m4.png", Math.floor(Math.random() *1000), Math.floor(Math.random() *150));
+let m5 = new Sprite("./images/ready/m5.png", Math.floor(Math.random() *1000), Math.floor(Math.random() *150));
+
+
 
 // missile
 let missile = new Sprite("./images/ready/missile.png", 0, 0);
 missile.display = "none";
-
 
 // Création d'objet Sprite = élément graphique
     // je vais donner 3 paramètres à la fonction :
@@ -91,6 +97,7 @@ document.onkeydown = function play(enter){
 
     // si j'appuie sur "entrer"
     if(enter.keyCode == 13){
+        clearInterval(refreshStart);
         document.body.className ="";
         startTitle.style.display ="none";
         document.onkeydown = function (event){
@@ -128,16 +135,13 @@ document.onkeydown = function play(enter){
                     // param 2 = la fréquence de rafraichissement
                     missile.startAnimation(moveMissile, 20);
                 }
-                
             }  
-
         }
 
-        
         // -------------------------------- vérifications qu'on ne sort pas du cadre  ------------
         if(vaisseau.left < 0){
             // si je sors du cadre alors je suis redéplacer à la valeur 0 (bord de map)
-            vaisseau.left =0;
+            vaisseau.left = 0;
         }
         // je vérifie que je ne sors pas à droite, donc je prends en compte la largeur du client - la largeur de l'image
         if(vaisseau.left > document.body.clientWidth - vaisseau._node.width){
@@ -216,15 +220,15 @@ document.onkeydown = function play(enter){
 
         function moveMissile(missile){
             // je fais monter le missile (la valeur correspond à la vitesse du missile)
-            missile.top -= 10;
+            missile.top -= 15;
             // arrête le missile lorsqu'il sort de sa fenêtre
             if(missile.top < -100) {
                 missile.stopAnimation();
                 missile.display = "none";
             }
             // si je tire sur un élément invisible alors je continue
-            if(m1.display == "none"){
-                return;
+            if(m1.display == "none" || m2.display == "none" || m3.display == "none" || m4.display == "none" || m5.display == "none" ){
+                
             }
             if(missile.checkCollision(m1)){
                 missile.stopAnimation();
@@ -232,22 +236,71 @@ document.onkeydown = function play(enter){
                 // si je touche un monstre alors je cache le missile
                 missile.display ="none";
                 // je cache le monstre
-                m1.display ="none";
+                m1.startAnimation(moveMonsterToTop, 10);
+            }
+            if(missile.checkCollision(m2)){
+                missile.stopAnimation();
+                m2.stopAnimation();
+                // si je touche un monstre alors je cache le missile
+                missile.display ="none";
+                // je cache le monstre
+                m2.startAnimation(moveMonsterToTop, 10);
+            }
+            if(missile.checkCollision(m3)){
+                missile.stopAnimation();
+                m3.stopAnimation();
+                // si je touche un monstre alors je cache le missile
+                missile.display ="none";
+                // je cache le monstre
+                m3.startAnimation(moveMonsterToTop, 10);
+            }
+            if(missile.checkCollision(m4)){
+                missile.stopAnimation();
+                m4.stopAnimation();
+                // si je touche un monstre alors je cache le missile
+                missile.display ="none";
+                // je cache le monstre
+                m4.startAnimation(moveMonsterToTop, 10);
+            }
+            if(missile.checkCollision(m5)){
+                missile.stopAnimation();
+                m5.stopAnimation();
+                // si je touche un monstre alors je cache le missile
+                missile.display ="none";
+                // je cache le monstre
+                m5.startAnimation(moveMonsterToTop, 10);
+            }
+        }
+
+        function moveMonsterToTop(monster){
+            // la valeur est la vitesse de déplacement vers la droite
+            monster.left += Math.floor(Math.random() *20);
+            if(monster.left > document.body.clientWidth - monster._node.width){
+                // je vais descendre mon monstre quand il arrive en bout de ligne
+                monster.top = 0;
+                // j'empêche mon monstre de sortir du cadre
+                monster.left = document.body.clientWidth - monster._node.width;
+                // je déclenche l'animation du monstre avec la fonction toRight, rafraichie à 20ms
+                monster.startAnimation(moveMonsterToRight, 10);
+            }
+            // si le monstre dépasse j'arrête son animation 
+            if(monster.top > document.body.clientHeight + monster._node.height) {
+                monster.stopAnimation();
             }
         }
 
         function moveMonsterToRight(monster){
             // la valeur est la vitesse de déplacement vers la droite
-            monster.left += 20;
+            monster.left += Math.floor(Math.random() *20);
             // si le monstre arrive au bord de map
             // je déduis la largeur de l'image du monstre pour ne pas soritr du cadre
             if(monster.left > document.body.clientWidth - monster._node.width){
                 // je vais descendre mon monstre quand il arrive en bout de ligne
-                monster.top += 30;
+                monster.top += Math.floor(Math.random() *40);
                 // j'empêche mon monstre de sortir du cadre
                 monster.left = document.body.clientWidth - monster._node.width;
                 // je déclenche l'animation du monstre avec la fonction toRight, rafraichie à 20ms
-                monster.startAnimation(moveMonsterToLeft, 20);
+                monster.startAnimation(moveMonsterToLeft, 10);
             }
             // si le monstre dépasse j'arrête son animation 
             if(monster.top > document.body.clientHeight + monster._node.height) {
@@ -257,30 +310,28 @@ document.onkeydown = function play(enter){
 
         function moveMonsterToLeft(monster){
             // la valeur est la vitesse de déplacement vers la droite
-            monster.left -= 20;
+            monster.left -= Math.floor(Math.random() *20);
             // si le monstre arrive au bord de map
             // je déduis la largeur de l'image du monstre pour ne pas soritr du cadre
             if(monster.left <= 0){
                 // je vais descendre mon monstre quand il arrive en bout de ligne
-                monster.top += 30;
+                monster.top += Math.floor(Math.random() *40);
                 // je déclenche l'animation du monstre avec la fonction toRight, rafraichie à 20ms
-                monster.startAnimation(moveMonsterToRight, 20);
+                monster.startAnimation(moveMonsterToRight, 10);
             }
             // si le monstre dépasse j'arrête son animation
             if(monster.top > document.body.clientHeight + monster._node.height) {
                 monster.stopAnimation();
             }
         }
-        // m2.startAnimation(moveMonsterToRight, 20);
-         m1.startAnimation(moveMonsterToRight, 20);
-        // boucle qui lance les monstres 
-        // for(var i = 1; i < 6 ;i++){
-        //     element = "m"+i;
-        //     console.log(element);
-        //     element.startAnimation(moveMonsterToRight, 20);
-        // }
+  
+        // il faudrait gérer la défaite + un score
 
-
+        m1.startAnimation(moveMonsterToRight, 10);
+        m2.startAnimation(moveMonsterToRight, 10);
+        m3.startAnimation(moveMonsterToRight, 10);
+        m4.startAnimation(moveMonsterToRight, 10);
+        m5.startAnimation(moveMonsterToRight, 10);
 
 
     //fin du if 

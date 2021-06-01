@@ -5,12 +5,10 @@
 }
 body{
     background: url(./images/fond-planet.jpg);
-    background: cover;
     overflow: hidden;
     color: white;
     width: 100vw;
     height: 100vh;
-    text-align: center;
 }
 video{
     position: fixed;
