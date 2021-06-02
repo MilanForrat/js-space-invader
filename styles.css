@@ -41,6 +41,9 @@ a{
 #white-space{
     margin-left: 10px;
 }
+#reload{
+    z-index: 100;
+}
 footer{
     position: absolute;
     bottom: 0;

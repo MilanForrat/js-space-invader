@@ -1,25 +1,5 @@
 let startTitle = document.getElementById('startTitle');
-// console.log(startTitle);
-let vaisseau = new Sprite("./images/ready/vaisseau.png", document.body.clientWidth/2, 700);
-
-// je recupère les enfants du body
-let imgElement = document.body.childNodes;
-console.log(imgElement)
-
-// m pour monstre
-let m1 = new Sprite("./images/ready/m1.png",Math.floor(Math.random() * 300)
-, Math.floor(Math.random() *150));
-let m2 = new Sprite("./images/ready/m2.png", Math.floor(Math.random() *1000), Math.floor(Math.random() *150));
-let m3 = new Sprite("./images/ready/m3.png", Math.floor(Math.random() *1000), Math.floor(Math.random() *150));
-let m4 = new Sprite("./images/ready/m4.png", Math.floor(Math.random() *1000), Math.floor(Math.random() *150));
-let m5 = new Sprite("./images/ready/m5.png", Math.floor(Math.random() *1000), Math.floor(Math.random() *150));
-
-
-
-// missile
-let missile = new Sprite("./images/ready/missile.png", 0, 0);
-missile.display = "none";
-
+let score = 1;
 // Création d'objet Sprite = élément graphique
     // je vais donner 3 paramètres à la fonction :
     // 1) le chemin d'accès au fichier
@@ -84,14 +64,67 @@ function Sprite(filename, left, top) {
         this.left = left;
         this.top = top;
 }
-// ------------------------------------- gestion des touches -------------------------------------
-    // tant que je n'ai pas appuyé sur entrer
-    let refreshStart = setInterval(playStartAnimation, 500);
-    // je lance une fonction qui change la couleur du texte html
-    function playStartAnimation() {
-      startTitle.style.color = startTitle.style.color == "white" ? "red" : "white";
+
+// ----------------------      création de l'interval de déplacement du missile et des monstres    ---------------------------------
+        
+// on ajoute une animation de départ
+// paramètre 1 = le nom de la fonction à rafraichir/rééxécuter (ex: startAnimation(missile, 20))
+// paramètre 2 = l'interval (le délais de rééxécution de l'action)
+Sprite.prototype.startAnimation = function (fct, interval) {
+    // s'il existe déjà un interval (ex: un missile tiré), alors je l'annule
+    if(this._clock) {
+        window.clearInterval(this._clock);
     }
+    // on associe à _this la valeur actuelle de l'objet
+    let _this = this;
+    // je déclenche à interval régulier et je stock cette action dans une variable _clock
+    this._clock = window.setInterval(function() {
+        // le _this correspond à l'élément et non pas à la fonction grâce à la ligne 140
+        fct (_this);
+    }, interval);
+};
+// on arrête l'animation de départ stockée dans la variable _clock
+Sprite.prototype.stopAnimation = function () {
+    window.clearInterval(this._clock);
+};
+
+// ----------------------- gestion de la colision -------------
+//check collision doit me retourner s'il y a une collision
+Sprite.prototype.checkCollision = function (other) {
+    // je renvoie l'inverse, donc je renvoie le fait que je soit en collision
+    return !
+        // je test qu'il n'y ait pas de collision
+    (
+        // si je me trouve en dessous de l'élement = pas de collision
+        (this.top + this._node.height < other.top) 
+                            ||
+        // si je me trouve au dessus de l'élément = pas de collision
+        this.top > (other.top + other._node.height)
+                            ||
+        // si je ne touche pas à droite = pas de collision
+        (this.left + this._node.width < other.left)
+                            ||
+        // si je bne touche pas à gauche = pas de collision
+        this.left > (other.left + other._node.width)
+    );
+}
+
+
      
+let vaisseau = new Sprite("./images/ready/vaisseau.png", document.body.clientWidth/2, 500);
+
+// missile
+let missile = new Sprite("./images/ready/missile-deplacement.gif", 0, 0);
+missile.display = "none";
+
+// tant que je n'ai pas appuyé sur entrer
+let refreshStart = setInterval(playStartAnimation, 500);
+// je lance une fonction qui change la couleur du texte html
+function playStartAnimation() {
+    startTitle.style.color = startTitle.style.color == "white" ? "red" : "white";
+}
+    
+// ------------------------------------- gestion des touches -------------------------------------
 // j'écoute le clavier pour recupérer un keycode (clé de la touche appuyée)
 document.onkeydown = function play(enter){
 
@@ -101,24 +134,56 @@ document.onkeydown = function play(enter){
         document.body.className ="";
         startTitle.style.display ="none";
         document.onkeydown = function (event){
-
             // permet de voir quelle touche est appuyée
             // console.log(event.keyCode);
-            // touche fleche du haut
+            // top
             if(event.keyCode == 38){
-                vaisseau.top -= 10;
+                vaisseau.top -= 15;
+                vaisseau._node.src = "./images/ready/vaisseau-deplacement.gif";
+                setTimeout(function(){
+                    vaisseau._node.src = "./images/ready/vaisseau.png";
+                }, 300);
             }
             // left
             if(event.keyCode == 37){
-                vaisseau.left -= 10;
+                vaisseau.left -= 15;
+                vaisseau._node.src = "./images/ready/vaisseau-deplacement.gif";
+                setTimeout(function(){
+                    vaisseau._node.src = "./images/ready/vaisseau.png";
+                }, 300);
             }
             //right
             if(event.keyCode == 39){
-                vaisseau.left +=  10;
+                vaisseau.left +=  15;
+                vaisseau._node.src = "./images/ready/vaisseau-deplacement.gif";
+                setTimeout(function(){
+                    vaisseau._node.src = "./images/ready/vaisseau.png";
+                }, 300);
             }
             //down
             if(event.keyCode == 40){
-                vaisseau.top +=  10;
+                vaisseau.top +=  15;
+                vaisseau._node.src = "./images/ready/vaisseau-deplacement.gif";
+                setTimeout(function(){
+                    vaisseau._node.src = "./images/ready/vaisseau.png";
+                }, 300);
+            }
+            // si collision entre vaisseau et alien
+            for(i=1; i <= 10; i++){
+                if(vaisseau.checkCollision(tableauMonstre[i])){
+                    document.body.className ="start";
+                    startTitle.style.display ="block";
+                    startTitle.style.zIndex = "1000";
+                    startTitle.innerText ="🛑 Game Over 🛑";
+                    startTitle.innerHTML += `<br>
+                    <button id="reload" onClick="window.location.reload();">Rejouer !</button>`
+                    tableauMonstre[i].stopAnimation();
+                    vaisseau._node.src = "./images/ready/explosion-game-over.gif";
+                    setTimeout(function(){
+                        vaisseau.display ="none";
+                    }, 3000);
+
+                }   
             }
             // espace = tir
             if(event.keyCode == 32){
@@ -133,28 +198,10 @@ document.onkeydown = function play(enter){
                     // j'invoque la fonction d'envoie du missile 
                     // param 1 = le nom de la fonction 
                     // param 2 = la fréquence de rafraichissement
-                    missile.startAnimation(moveMissile, 20);
+                    missile.startAnimation(moveMissile, 10);
                 }
-            }  
-        }
-
-        // -------------------------------- vérifications qu'on ne sort pas du cadre  ------------
-        if(vaisseau.left < 0){
-            // si je sors du cadre alors je suis redéplacer à la valeur 0 (bord de map)
-            vaisseau.left = 0;
-        }
-        // je vérifie que je ne sors pas à droite, donc je prends en compte la largeur du client - la largeur de l'image
-        if(vaisseau.left > document.body.clientWidth - vaisseau._node.width){
-            vaisseau.left = document.body.clientWidth - vaisseau._node.width;
-        }
-        if(vaisseau.top < 0){
-            // si je sors du cadre alors je suis redéplacer à la valeur 0 (bord de map)
-            vaisseau.top =0;
-        }
-        if(vaisseau.top > document.body.clientHeight - vaisseau._node.height){
-            vaisseau.top = document.body.clientHeight - vaisseau._node.height;
-        }
-        if(window.onresize){
+            } 
+            // -------------------------------- vérifications qu'on ne sort pas du cadre  ------------
             if(vaisseau.left < 0){
                 // si je sors du cadre alors je suis redéplacer à la valeur 0 (bord de map)
                 vaisseau.left = 0;
@@ -165,142 +212,99 @@ document.onkeydown = function play(enter){
             }
             if(vaisseau.top < 0){
                 // si je sors du cadre alors je suis redéplacer à la valeur 0 (bord de map)
-                vaisseau.top = 0;
+                vaisseau.top =0;
             }
             if(vaisseau.top > document.body.clientHeight - vaisseau._node.height){
                 vaisseau.top = document.body.clientHeight - vaisseau._node.height;
             }
+            if(window.onresize){
+                if(vaisseau.left < 0){
+                    // si je sors du cadre alors je suis redéplacer à la valeur 0 (bord de map)
+                    vaisseau.left = 0;
+                }
+                // je vérifie que je ne sors pas à droite, donc je prends en compte la largeur du client - la largeur de l'image
+                if(vaisseau.left > document.body.clientWidth - vaisseau._node.width){
+                    vaisseau.left = document.body.clientWidth - vaisseau._node.width;
+                }
+                if(vaisseau.top < 0){
+                    // si je sors du cadre alors je suis redéplacer à la valeur 0 (bord de map)
+                    vaisseau.top = 0;
+                }
+                if(vaisseau.top > document.body.clientHeight - vaisseau._node.height){
+                    vaisseau.top = document.body.clientHeight - vaisseau._node.height;
+                }
+            } 
         }
-        // ----------------------      création de l'interval de déplacement du missile et des monstres    ---------------------------------
-        
-        // on ajoute une animation de départ
-        // paramètre 1 = le nom de la fonction à rafraichir/rééxécuter (ex: startAnimation(missile, 20))
-        // paramètre 2 = l'interval (le délais de rééxécution de l'action)
-        Sprite.prototype.startAnimation = function (fct, interval) {
-            // s'il existe déjà un interval (ex: un missile tiré), alors je l'annule
-            if(this._clock) {
-                window.clearInterval(this._clock);
+        // tableau de monstre (10 monstres et 5 images)        
+        let tableauMonstre = [];
+        let randomNumber = 0;
+        for(let i=1; i <= 10; i++){
+            randomNumber = Math.floor(Math.random()*10 +1);
+            if(i <= 5){
+                tableauMonstre[i] = new Sprite("./images/ready/m"+i+".png", Math.floor(Math.random() *1000), Math.floor(Math.random() *150));
             }
-            // on associe à _this la valeur actuelle de l'objet
-            let _this = this;
-            // je déclenche à interval régulier et je stock cette action dans une variable _clock
-            this._clock = window.setInterval(function() {
-                // le _this correspond à l'élément et non pas à la fonction grâce à la ligne 140
-                fct (_this);
-            }, interval);
-        };
-        // on arrête l'animation de départ stockée dans la variable _clock
-        Sprite.prototype.stopAnimation = function () {
-            window.clearInterval(this._clock);
-        };
-
-        // ----------------------- gestion de la colision -------------
-        //check collision doit me retourner s'il y a une collision
-        Sprite.prototype.checkCollision = function (other) {
-            // je souhaite l'inverse du test ci dessous, donc je regarde s'il y a collision
-            return ! 
-                // je test qu'il n'y ait pas de collision
-            (
-
-                // si je me trouve en dessous de l'élement = pas de collision
-                (this.top + this._node.height < other.top) 
-                                    ||
-                // si je me trouve au dessus de l'élément = pas de collision
-                this.top > (other.top + other._node.height)
-                                    ||
-                // si je ne touche pas à droite = pas de collision
-                (this.left + this._node.width < other.left)
-                                    ||
-                // si je bne touche pas à gauche = pas de collision
-                this.left > (other.left + other._node.width)
-            );
+            else if(i <= 10){
+                tableauMonstre[i] = new Sprite("./images/ready/m"+ (i-5) +".png", Math.floor(Math.random() *1000), Math.floor(Math.random() *150));
+            }
+            if(randomNumber < 5){
+                tableauMonstre[i].startAnimation(moveMonsterToRight, 10);
+            }
+           else{
+                tableauMonstre[i].startAnimation(moveMonsterToLeft, 10);
+           }        
         }
 
         // ---------------------- Création du déplacement du missile et des monstres ---------------------------------
-
         function moveMissile(missile){
             // je fais monter le missile (la valeur correspond à la vitesse du missile)
-            missile.top -= 15;
-            // arrête le missile lorsqu'il sort de sa fenêtre
-            if(missile.top < -100) {
+            missile.top -= 8;
+
+                // arrête le missile lorsqu'il sort de sa fenêtre
+            if(missile.top < 0) {
                 missile.stopAnimation();
                 missile.display = "none";
             }
-            // si je tire sur un élément invisible alors je continue
-            if(m1.display == "none" || m2.display == "none" || m3.display == "none" || m4.display == "none" || m5.display == "none" ){
+            for(let i=1; i <=10;i++){
+                if(tableauMonstre[i].display == "none") continue;
+                // on regarde s'il y a collision entre un monstre et un missile
                 
+                if(missile.checkCollision(tableauMonstre[i])){
+                    missile.stopAnimation();
+                    missile.display = "none";
+                    tableauMonstre[i].stopAnimation();
+                    // animation gif explosion monstre
+                    
+                    tableauMonstre[i]._node.src = "./images/ready/explosion.gif";
+                    // si je tire de nouveau j'annule l'animation
+                    setTimeout(function(){
+                        tableauMonstre[i].display = "none";
+                    }, 500);
+                    score++;
+                }
             }
-            if(missile.checkCollision(m1)){
-                missile.stopAnimation();
-                m1.stopAnimation();
-                // si je touche un monstre alors je cache le missile
-                missile.display ="none";
-                // je cache le monstre
-                m1.startAnimation(moveMonsterToTop, 10);
+            function checkScore(score){
+                for(let i = 1; i < score;i++){
+                    startTitle.innerText= i+"kills !";
+                    startTitle.style.display ="block";
+                }
             }
-            if(missile.checkCollision(m2)){
-                missile.stopAnimation();
-                m2.stopAnimation();
-                // si je touche un monstre alors je cache le missile
-                missile.display ="none";
-                // je cache le monstre
-                m2.startAnimation(moveMonsterToTop, 10);
-            }
-            if(missile.checkCollision(m3)){
-                missile.stopAnimation();
-                m3.stopAnimation();
-                // si je touche un monstre alors je cache le missile
-                missile.display ="none";
-                // je cache le monstre
-                m3.startAnimation(moveMonsterToTop, 10);
-            }
-            if(missile.checkCollision(m4)){
-                missile.stopAnimation();
-                m4.stopAnimation();
-                // si je touche un monstre alors je cache le missile
-                missile.display ="none";
-                // je cache le monstre
-                m4.startAnimation(moveMonsterToTop, 10);
-            }
-            if(missile.checkCollision(m5)){
-                missile.stopAnimation();
-                m5.stopAnimation();
-                // si je touche un monstre alors je cache le missile
-                missile.display ="none";
-                // je cache le monstre
-                m5.startAnimation(moveMonsterToTop, 10);
-            }
+            checkScore(score);
         }
-
-        function moveMonsterToTop(monster){
-            // la valeur est la vitesse de déplacement vers la droite
-            monster.left += Math.floor(Math.random() *20);
-            if(monster.left > document.body.clientWidth - monster._node.width){
-                // je vais descendre mon monstre quand il arrive en bout de ligne
-                monster.top = 0;
-                // j'empêche mon monstre de sortir du cadre
-                monster.left = document.body.clientWidth - monster._node.width;
-                // je déclenche l'animation du monstre avec la fonction toRight, rafraichie à 20ms
-                monster.startAnimation(moveMonsterToRight, 10);
-            }
-            // si le monstre dépasse j'arrête son animation 
-            if(monster.top > document.body.clientHeight + monster._node.height) {
-                monster.stopAnimation();
-            }
-        }
+       
 
         function moveMonsterToRight(monster){
             // la valeur est la vitesse de déplacement vers la droite
-            monster.left += Math.floor(Math.random() *20);
+            monster.left += Math.floor(Math.random() *2);
+            monster.top += Math.floor(Math.random() *1.2);
             // si le monstre arrive au bord de map
             // je déduis la largeur de l'image du monstre pour ne pas soritr du cadre
             if(monster.left > document.body.clientWidth - monster._node.width){
                 // je vais descendre mon monstre quand il arrive en bout de ligne
-                monster.top += Math.floor(Math.random() *40);
+                monster.top += Math.floor(Math.random() *10);
                 // j'empêche mon monstre de sortir du cadre
                 monster.left = document.body.clientWidth - monster._node.width;
                 // je déclenche l'animation du monstre avec la fonction toRight, rafraichie à 20ms
-                monster.startAnimation(moveMonsterToLeft, 10);
+                monster.startAnimation(moveMonsterToLeft, 15);
             }
             // si le monstre dépasse j'arrête son animation 
             if(monster.top > document.body.clientHeight + monster._node.height) {
@@ -310,31 +314,20 @@ document.onkeydown = function play(enter){
 
         function moveMonsterToLeft(monster){
             // la valeur est la vitesse de déplacement vers la droite
-            monster.left -= Math.floor(Math.random() *20);
+            monster.left -= Math.floor(Math.random() *2);
+            monster.top += Math.floor(Math.random() *1.2);
             // si le monstre arrive au bord de map
             // je déduis la largeur de l'image du monstre pour ne pas soritr du cadre
             if(monster.left <= 0){
                 // je vais descendre mon monstre quand il arrive en bout de ligne
-                monster.top += Math.floor(Math.random() *40);
+                monster.top += Math.floor(Math.random() *10);
                 // je déclenche l'animation du monstre avec la fonction toRight, rafraichie à 20ms
-                monster.startAnimation(moveMonsterToRight, 10);
+                monster.startAnimation(moveMonsterToRight, 15);
             }
             // si le monstre dépasse j'arrête son animation
             if(monster.top > document.body.clientHeight + monster._node.height) {
                 monster.stopAnimation();
             }
         }
-  
-        // il faudrait gérer la défaite + un score
-
-        m1.startAnimation(moveMonsterToRight, 10);
-        m2.startAnimation(moveMonsterToRight, 10);
-        m3.startAnimation(moveMonsterToRight, 10);
-        m4.startAnimation(moveMonsterToRight, 10);
-        m5.startAnimation(moveMonsterToRight, 10);
-
-
-    //fin du if 
     }
-// fin de la fonction    
 }
