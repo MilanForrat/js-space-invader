@@ -171,18 +171,7 @@ document.onkeydown = function play(enter){
             // si collision entre vaisseau et alien
             for(i=1; i <= 10; i++){
                 if(vaisseau.checkCollision(tableauMonstre[i])){
-                    document.body.className ="start";
-                    startTitle.style.display ="block";
-                    startTitle.style.zIndex = "1000";
-                    startTitle.innerText ="🛑 Game Over 🛑";
-                    startTitle.innerHTML += `<br>
-                    <button id="reload" onClick="window.location.reload();">Rejouer !</button>`
-                    tableauMonstre[i].stopAnimation();
-                    vaisseau._node.src = "./images/ready/explosion-game-over.gif";
-                    setTimeout(function(){
-                        vaisseau.display ="none";
-                    }, 3000);
-
+                    gameOver();
                 }   
             }
             // espace = tir
@@ -291,6 +280,18 @@ document.onkeydown = function play(enter){
             checkScore(score);
         }
        
+        function gameOver(){
+            document.body.className ="start";
+            startTitle.style.display ="block";
+            startTitle.style.zIndex = "1000";
+            startTitle.innerText ="🛑 Game Over 🛑";
+            startTitle.innerHTML += `<br>
+            <button id="reload" onClick="window.location.reload();">Rejouer !</button>`
+            tableauMonstre[i].stopAnimation();
+            setTimeout(function(){
+                vaisseau.display ="none";
+            }, 100);
+        }
 
         function moveMonsterToRight(monster){
             // la valeur est la vitesse de déplacement vers la droite
