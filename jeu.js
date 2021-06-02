@@ -1,3 +1,8 @@
+// TODO : 
+// game over si les monstres dépassent une ligne en bas de l'écran
+// rePop des monstres régulièrement
+// animation des game over
+
 let startTitle = document.getElementById('startTitle');
 let score = 1;
 // Création d'objet Sprite = élément graphique
